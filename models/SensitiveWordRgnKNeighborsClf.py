@@ -8,7 +8,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-class SensitiveClf:
+class SensitiveWordRgnKNeighborsClf:
     def __init__(self, path):
         self.clf = None
         # 加载训练数据
@@ -39,17 +39,15 @@ class SensitiveClf:
 
     # 进行数据训练
     def Train(self):
-        fcache = "./data/model/train.mod"
+        fcache = "./data/model/kneighbors.model"
         if os.path.isfile(fcache):
             print("Train model exists!")
             self.clf = joblib.load(fcache)
             return
 
-        #随机森林就是通过集成学习的思想将多棵树集成的一种算法，它的基本单元是决策树。
-        #每棵决策树都是一个分类器，那么对于一个输入样本，N棵树会有N个分类结果。
-        #而随机森林集成了所有的分类投票结果，将投票次数最多的类别指定为最终的输出
-        #self.clf = RandomForestClassifier(n_estimators=100)
-        self.clf = RidgeClassifier(tol=1e-2, solver="sag")
+        # K邻居法: 采用向量空间模型来分类, 概念为相同类别的案例, 彼此的相似度高,
+        # 而可以借由计算与已知类别案例之相似度, 来评估未知类别案例可能的分类.
+        self.clf = KNeighborsClassifier(n_neighbors=10)
         self.clf.fit(self.X, self.Y)
 
         # 将训练模型存储到磁盘 - 下次启动时大幅减少训练时间
@@ -85,8 +83,8 @@ class SensitiveClf:
 
 if __name__ == "__main__":
     # 创建敏感词分类器
-    clf = SensitiveClf('./data/train/')
+    clf = SensitiveWordRgnKNeighborsClf('../data/train/')
 
     clf.Train()
 
-    clf.Accuracy('./data/test/')
+    clf.Accuracy('../data/test/')

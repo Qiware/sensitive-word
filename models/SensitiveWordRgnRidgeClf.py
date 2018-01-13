@@ -8,7 +8,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-class SensitiveClf:
+class SensitiveWordRgnRidgeClf:
     def __init__(self, path):
         self.clf = None
         # 加载训练数据
@@ -39,16 +39,15 @@ class SensitiveClf:
 
     # 进行数据训练
     def Train(self):
-        fcache = "./data/model/train.mod"
+        fcache = "./data/model/ridge.model"
         if os.path.isfile(fcache):
             print("Train model exists!")
             self.clf = joblib.load(fcache)
             return
 
-        #随机森林就是通过集成学习的思想将多棵树集成的一种算法，它的基本单元是决策树。
-        #每棵决策树都是一个分类器，那么对于一个输入样本，N棵树会有N个分类结果。
-        #而随机森林集成了所有的分类投票结果，将投票次数最多的类别指定为最终的输出
-        #self.clf = RandomForestClassifier(n_estimators=100)
+        # 岭回归: 是一种专用于共线性数据分析的有偏估计回归方法，实质上是一种改良
+        # 的最小二通过放弃最小二乘法的无偏性，以损失部分信息、降低精度为代价获得
+        # 回归系数更可靠的回归方法，对病态数据的拟合要强于最小二乘法
         self.clf = RidgeClassifier(tol=1e-2, solver="sag")
         self.clf.fit(self.X, self.Y)
 
@@ -85,8 +84,8 @@ class SensitiveClf:
 
 if __name__ == "__main__":
     # 创建敏感词分类器
-    clf = SensitiveClf('./data/train/')
+    clf = SensitiveWordRgnRidgeClf('../data/train/')
 
     clf.Train()
 
-    clf.Accuracy('./data/test/')
+    clf.Accuracy('../data/test/')

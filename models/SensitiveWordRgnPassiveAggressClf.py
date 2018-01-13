@@ -8,7 +8,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-class SensitiveClf:
+class SensitiveWordRgnPassiveAggressClf:
     def __init__(self, path):
         self.clf = None
         # 加载训练数据
@@ -39,17 +39,15 @@ class SensitiveClf:
 
     # 进行数据训练
     def Train(self):
-        fcache = "./data/model/train.mod"
+        fcache = "./data/model/passive-aggressive.model"
         if os.path.isfile(fcache):
             print("Train model exists!")
             self.clf = joblib.load(fcache)
             return
 
-        #随机森林就是通过集成学习的思想将多棵树集成的一种算法，它的基本单元是决策树。
-        #每棵决策树都是一个分类器，那么对于一个输入样本，N棵树会有N个分类结果。
-        #而随机森林集成了所有的分类投票结果，将投票次数最多的类别指定为最终的输出
-        #self.clf = RandomForestClassifier(n_estimators=100)
-        self.clf = RidgeClassifier(tol=1e-2, solver="sag")
+        # 被动攻击算法: 是一种适用于大规模学习的算法.它们与感知机类似的地方是也
+        # 不需要设置学习率.
+        self.clf = PassiveAggressiveClassifier(max_iter=50)
         self.clf.fit(self.X, self.Y)
 
         # 将训练模型存储到磁盘 - 下次启动时大幅减少训练时间
@@ -85,8 +83,8 @@ class SensitiveClf:
 
 if __name__ == "__main__":
     # 创建敏感词分类器
-    clf = SensitiveClf('./data/train/')
+    clf = SensitiveWordRgnPassiveAggressClf('../data/train/')
 
     clf.Train()
 
-    clf.Accuracy('./data/test/')
+    clf.Accuracy('../data/test/')
