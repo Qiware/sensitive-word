@@ -68,7 +68,7 @@ class SensitiveClf:
 
     # 校验测试数据
     def Accuracy(self, path):
-        # 加载训练数据
+        # 加载测试数据
         ds = datasets.load_files(path);
         if ds is None:
             print("Load dataset failed! path:%s" % (path))
